@@ -1,3 +1,4 @@
+from sklearn import preprocessing
 import pandas as  pd
 import numpy as np
 
@@ -10,16 +11,11 @@ def clean(df):
     # split ticket code into prefix and number
     df2 = pd.concat([df['Ticket'], df['Ticket'].str.extract('(?P<ticket_prefix>[\d\w\W\.\/]*) (?P<ticket_number>\d*)')],
               axis=1)
+    # ended up with some isolated cases of a certain text string in the ticket_number column
+    df2['ticket_number'] = np.where(df2['ticket_number'] == 'LINE', df2['ticket_number'], 0)
     df2.ticket_number.fillna(df.Ticket, inplace=True)
     df2.ticket_prefix.fillna('', inplace=True)
-    import pdb
-    pdb.set_trace()
-    print("Size of df before merge: ", df.shape)
-    print("Size of df2 before merge: ", df2.shape)
-    print("All values in merge columns the same?: %s" % all(df.Ticket.values == df2.Ticket.values))
-    df3 = pd.merge(df, df2, how='inner', left_on=['Ticket'], right_on=['Ticket'], copy=False)
-    print("Size of df3 after merge: ", df3.shape)
-    from sklearn import preprocessing
+    df3 = df.merge(df2, how='left', left_index=True, right_index=True)
     le = preprocessing.LabelEncoder()
     le.fit(df3.ticket_prefix.values[:, np.newaxis])
     df3.ticket_prefix = le.transform(df3['ticket_prefix'])
@@ -46,23 +42,23 @@ def create_ann():
     # Model
     model = Sequential()
     # input layer
-    model.add(Dense(8, input_shape=(8,)))
+    model.add(Dense(10, input_shape=(10,)))
     model.add(BatchNormalization())
     model.add(Activation("relu"))
     model.add(Dropout(0.4))
 
     # hidden layers
-    model.add(Dense(8))
+    model.add(Dense(100))
     model.add(BatchNormalization())
     model.add(Activation("sigmoid"))
     model.add(Dropout(0.4))
 
-    model.add(Dense(4))
+    model.add(Dense(100))
     model.add(BatchNormalization())
     model.add(Activation("sigmoid"))
     model.add(Dropout(0.4))
 
-    model.add(Dense(2, activation="sigmoid"))
+    model.add(Dense(50, activation="sigmoid"))
 
     # output layer
     model.add(Dense(1, activation='linear'))
@@ -92,7 +88,7 @@ def main():
     model = create_ann()
 
     # Learning
-    model.fit(X, y, nb_epoch=300, batch_size=30)
+    model.fit(X, y, epochs=300, batch_size=30)
 
     # Scoring
     # float to [0,1]
