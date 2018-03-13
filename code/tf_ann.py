@@ -3,8 +3,6 @@ import numpy as np
 
 def clean(df):
     """Clean the data and return the inputs and labels"""
-    import pdb
-    pdb.set_trace()
     df = pd.read_csv("data/train.csv")
     df = df.replace(["male", "female"], [0,1])
     df = df.replace(["S", "C", "Q"], [0,1,2])
@@ -14,7 +12,13 @@ def clean(df):
               axis=1)
     df2.ticket_number.fillna(df.Ticket, inplace=True)
     df2.ticket_prefix.fillna('', inplace=True)
-    df3 = pd.merge(df, df2, how='inner', on='Ticket')
+    import pdb
+    pdb.set_trace()
+    print("Size of df before merge: ", df.shape)
+    print("Size of df2 before merge: ", df2.shape)
+    print("All values in merge columns the same?: %s" % all(df.Ticket.values == df2.Ticket.values))
+    df3 = pd.merge(df, df2, how='inner', left_on=['Ticket'], right_on=['Ticket'], copy=False)
+    print("Size of df3 after merge: ", df3.shape)
     from sklearn import preprocessing
     le = preprocessing.LabelEncoder()
     le.fit(df3.ticket_prefix.values[:, np.newaxis])
@@ -82,8 +86,6 @@ def main():
 
     # Data split
     from sklearn.model_selection import train_test_split
-    import pdb
-    pdb.set_trace()
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.2)
 
     # Model Architecture
