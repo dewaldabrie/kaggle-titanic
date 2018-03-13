@@ -1,4 +1,5 @@
 tensoflow-gpu
+sklearn
 scipy
 numpy
 pandas
