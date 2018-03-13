@@ -1,0 +1,6 @@
+tensoflow-gpu
+scipy
+numpy
+pandas
+keras
+matplotlib
