@@ -8,10 +8,16 @@ def clean(df):
     df = df.replace(["male", "female"], [0,1])
     df = df.replace(["S", "C", "Q"], [0,1,2])
     df = df.fillna(0)
-    # split ticket code into prefix and number
+    # Split ticket code into prefix and number
     df2 = pd.concat([df['Ticket'], df['Ticket'].str.extract('(?P<ticket_prefix>[\d\w\W\.\/]*) (?P<ticket_number>\d*)')],
               axis=1)
-    # ended up with some isolated cases of a certain text string in the ticket_number column
+    # Extract last name from full name and encode
+    df2['Name'] = df['Name'].str.extract('(?P<Name>[\d\w\W\.\/]*),')
+    le = preprocessing.LabelEncoder()
+    le.fit(df2.Name.values[:, np.newaxis])
+    df2.Name = le.transform(df2['Name'])
+    print(df2.Name)
+    # ... ended up with some isolated cases of a certain text string in the ticket_number column
     df2['ticket_number'] = np.where(df2['ticket_number'] == 'LINE', df2['ticket_number'], 0)
     df2.ticket_number.fillna(df.Ticket, inplace=True)
     df2.ticket_prefix.fillna('', inplace=True)
@@ -19,7 +25,6 @@ def clean(df):
     le = preprocessing.LabelEncoder()
     le.fit(df3.ticket_prefix.values[:, np.newaxis])
     df3.ticket_prefix = le.transform(df3['ticket_prefix'])
-    #extract last name from full name and encode
 
     if 'Survived' in df.columns:
         y = df[["Survived"]]
@@ -82,13 +87,13 @@ def main():
 
     # Data split
     from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7)
 
     # Model Architecture
     model = create_ann()
 
     # Learning
-    model.fit(X, y, epochs=300, batch_size=30)
+    model.fit(X, y, epochs=900, batch_size=10)
 
     # Scoring
     # float to [0,1]
