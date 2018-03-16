@@ -49,21 +49,21 @@ def create_ann():
     # input layer
     model.add(Dense(10, input_shape=(10,)))
     model.add(BatchNormalization())
-    model.add(Activation("relu"))
+    model.add(Activation("selu"))
     model.add(Dropout(0.4))
 
     # hidden layers
     model.add(Dense(100))
     model.add(BatchNormalization())
-    model.add(Activation("sigmoid"))
+    model.add(Activation("tanh"))
     model.add(Dropout(0.4))
 
     model.add(Dense(100))
     model.add(BatchNormalization())
-    model.add(Activation("sigmoid"))
+    model.add(Activation("tanh"))
     model.add(Dropout(0.4))
 
-    model.add(Dense(50, activation="sigmoid"))
+    model.add(Dense(50, activation="tanh"))
 
     # output layer
     model.add(Dense(1, activation='linear'))
@@ -93,7 +93,7 @@ def main():
     model = create_ann()
 
     # Learning
-    model.fit(X, y, epochs=900, batch_size=10)
+    model.fit(X, y, epochs=500, batch_size=10)
 
     # Scoring
     # float to [0,1]
